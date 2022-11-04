@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  coboId    Int      @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String   @unique
+  phone     String   @unique
+  firstName String
+  lastName  String
+}
+
+model Address {
+  id Int @id @default(autoincrement())
+}
+
+model Task {
+  id Int @id @default(autoincrement())
+}
+
+model Responsibility {
+  id Int @id @default(autoincrement())
+}
