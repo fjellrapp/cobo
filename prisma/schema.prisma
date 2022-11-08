@@ -9,24 +9,46 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  coboId    Int      @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  email     String   @unique
-  phone     String   @unique
-  firstName String
-  lastName  String
+  id              Int              @id @default(autoincrement())
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  email           String           @unique
+  phone           String           @unique
+  firstName       String
+  lastName        String
+  household       Household        @relation(fields: [id], references: [id])
+  responsibilites Responsibility[]
+}
+
+model Household {
+  id          Int      @id @default(autoincrement())
+  displayName String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  address     Address  @relation(fields: [id], references: [id])
+  tasks       Task[]
+  members     User[]
 }
 
 model Address {
-  id Int @id @default(autoincrement())
+  id           Int         @id @default(autoincrement())
+  streetName   String
+  streetNumber Int
+  postalCode   Int
+  State        String
+  City         String
+  Country      String
+  Household    Household[]
 }
 
 model Task {
-  id Int @id @default(autoincrement())
+  id            Int       @id @default(autoincrement())
+  householdTask Household @relation(fields: [id], references: [id])
 }
 
 model Responsibility {
-  id Int @id @default(autoincrement())
+  id           Int    @id @default(autoincrement())
+  assignedUser User   @relation(fields: [id], references: [id])
+  description  String
 }
