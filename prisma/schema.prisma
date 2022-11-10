@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider          = "postgresql"
-  url               = env("DATABASE_URL")
-  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -16,7 +15,9 @@ model User {
   phone           String           @unique
   firstName       String
   lastName        String
-  household       Household        @relation(fields: [id], references: [id])
+  password        String
+  household       Household?       @relation(fields: [householdId], references: [id])
+  householdId     Int?
   responsibilites Responsibility[]
 }
 
@@ -26,7 +27,7 @@ model Household {
   description String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  address     Address  @relation(fields: [id], references: [id])
+  address     Address? @relation(fields: [id], references: [id])
   tasks       Task[]
   members     User[]
 }
@@ -35,11 +36,11 @@ model Address {
   id           Int         @id @default(autoincrement())
   streetName   String
   streetNumber Int
-  postalCode   Int
-  State        String
-  City         String
-  Country      String
-  Household    Household[]
+  postalCode   String
+  state        String
+  city         String
+  country      String
+  household    Household[]
 }
 
 model Task {
