@@ -6,6 +6,10 @@ import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { jwtConstants } from './constants';
+import { AccessTokenRepository } from './repository/accessToken.repository';
+import { RefreshTokenRepositoy } from './repository/refreshToken.repository';
+import { RefreshTokenStrategy } from './strategy/jwt-r.strategy';
+import { AccessTokenStrategy } from './strategy/jwt.strategy';
 import { LocalStrategy } from './strategy/local.strategy';
 
 @Module({
@@ -13,11 +17,19 @@ import { LocalStrategy } from './strategy/local.strategy';
     UsersModule,
     PassportModule,
     JwtModule.register({
-      secret: jwtConstants.secret,
-      signOptions: { expiresIn: '60s' },
+      secret: jwtConstants.access_secret,
+      signOptions: { expiresIn: '120s' },
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, BCryptService, LocalStrategy],
+  providers: [
+    AuthService,
+    BCryptService,
+    LocalStrategy,
+    AccessTokenStrategy,
+    RefreshTokenStrategy,
+    AccessTokenRepository,
+    RefreshTokenRepositoy,
+  ],
 })
 export class AuthModule {}

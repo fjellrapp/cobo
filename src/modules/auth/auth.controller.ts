@@ -9,23 +9,23 @@ import {
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { Response } from 'express';
+import { Public } from 'src/common/utils/decorators/public';
 import { isUser } from 'src/common/utils/guards';
 import { AuthService } from './auth.service';
-import { LocalAuthGuard } from './local-auth.guard';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private service: AuthService) {}
 
+  @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req) {
     try {
       const user = req.user as User;
-      const token = await this.service.login({
-        phonenumber: user.phone,
-        pass: user.password,
-      });
+      const token = await this.service.login(user);
+      console.log(token);
       return token;
     } catch (e) {
       console.log('err, ', e);

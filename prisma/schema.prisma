@@ -19,6 +19,7 @@ model User {
   household       Household?       @relation(fields: [householdId], references: [id])
   householdId     Int?
   responsibilites Responsibility[]
+  refreshTokens   RefreshToken[]
 }
 
 model Household {
@@ -52,4 +53,13 @@ model Responsibility {
   id           Int    @id @default(autoincrement())
   assignedUser User   @relation(fields: [id], references: [id])
   description  String
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    Int
+  hash      String
+  isRevoked Boolean
+  expires   DateTime
 }

@@ -10,7 +10,7 @@ export class UsersService {
     private bcryptService: BCryptService,
   ) {}
 
-  async findOne(phonenumber: string): Promise<User | undefined> {
+  async findOneByPhone(phonenumber: string): Promise<User | undefined> {
     return this.prismaService.user.findUnique({
       where: {
         phone: phonenumber,
