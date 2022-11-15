@@ -8,6 +8,7 @@ import { User } from '@prisma/client';
 import { BCryptService } from 'src/common/providers/bcrypt.service';
 import { RefreshToken } from 'src/common/utils/types/refreshToken.type';
 import { UsersService } from '../users/users.service';
+import { jwtConstants } from './constants';
 import { AccessTokenRepository } from './repository/accessToken.repository';
 import { RefreshTokenRepositoy } from './repository/refreshToken.repository';
 
@@ -77,6 +78,7 @@ export class AuthService {
         try {
           const token = await this.jwtService.verifyAsync<RefreshToken>(
             refreshToken,
+            { secret: jwtConstants.refresh_secret },
           );
           return token;
         } catch (e) {
@@ -117,10 +119,7 @@ export class AuthService {
 
   async getTokens(user: User) {
     const accessToken = await this.accessTokenRepo.generateAccessToken(user);
-    const refreshToken = await this.refreshTokenRepo.createRefreshToken(
-      user,
-      10 * 10 * 60 * 60,
-    );
+    const refreshToken = await this.refreshTokenRepo.createRefreshToken(user);
 
     return { accessToken, refreshToken };
   }
