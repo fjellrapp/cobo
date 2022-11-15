@@ -1,28 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { RefreshToken, User } from '@prisma/client';
-import client from 'prisma/client';
+import { JwtService } from '@nestjs/jwt';
+import { User } from '@prisma/client';
+import { RefreshToken } from 'src/common/utils/types/refreshToken.type';
 
 @Injectable()
 export class RefreshTokenRepositoy {
-  async createRefreshToken(user: User, ttl: number): Promise<RefreshToken> {
+  constructor(private jwtService: JwtService) {}
+  async createRefreshToken(user: User, ttl: number): Promise<string> {
     const token: RefreshToken = {
-      id: 0,
-      userId: user.id,
-      hash: '',
+      userId: 0,
       isRevoked: false,
       expires: undefined,
     };
-
     token.userId = user.id;
 
     const expiration = new Date();
     expiration.setTime(expiration.getTime() + ttl);
 
     token.expires = expiration;
-    return token;
-  }
 
-  async findByTokenId(id: number): Promise<RefreshToken> {
-    return client.refreshToken.findUnique({ where: { id } });
+    const signedToken = this.jwtService.sign(token);
+    return signedToken;
   }
 }

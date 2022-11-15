@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 import { IS_PUBLIC_KEY } from 'src/common/utils/decorators/public';
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
+export class JwtRefreshAuthGuard extends AuthGuard('jwt-refresh') {
   constructor(private reflector: Reflector) {
     super();
   }
@@ -17,7 +17,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    console.log(context);
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -27,10 +26,18 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
     return super.canActivate(context);
   }
-  handleRequest<TUser = any>(err: any, user: any, info: any): TUser {
+
+  handleRequest<TUser = any>(
+    err: any,
+    user: any,
+    info: any,
+    context: ExecutionContext,
+    status?: any,
+  ): TUser {
     if (err || !user) {
-      throw err || new UnauthorizedException();
+      throw err || new UnauthorizedException(info);
     }
+
     return user;
   }
 }

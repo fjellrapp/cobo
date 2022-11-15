@@ -7,12 +7,7 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
 @Module({
-  providers: [
-    PrismaService,
-    UsersService,
-    BCryptService,
-    { provide: APP_GUARD, useClass: JwtAuthGuard },
-  ],
+  providers: [PrismaService, UsersService, BCryptService],
   controllers: [UsersController],
   exports: [UsersService],
 })
