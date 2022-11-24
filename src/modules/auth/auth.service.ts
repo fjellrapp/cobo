@@ -118,6 +118,7 @@ export class AuthService {
   }
 
   async getTokens(user: User) {
+    console.log('UsER', user);
     const accessToken = await this.accessTokenRepo.generateAccessToken(user);
     const refreshToken = await this.refreshTokenRepo.createRefreshToken(user);
 
