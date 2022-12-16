@@ -24,14 +24,20 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req) {
+  async login(
+    @Request() req,
+    @Res() res,
+  ): Promise<{ access_token: string; refresh_token: string } | Error> {
     try {
-      console.log('user', req.user);
       const user = req.user as User;
       const token = await this.service.login(user);
-      return token;
-    } catch (e) {
-      console.log('err, ', e);
+      res.status(HttpStatus.OK).send(token);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        return e;
+      } else {
+        return new Error(`New error: ${e}`);
+      }
     }
   }
 
