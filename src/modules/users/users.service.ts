@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
+import { randomUUID } from 'crypto';
 import { BCryptService } from 'src/common/providers/bcrypt.service';
 import { PrismaService } from 'src/common/providers/prisma.service';
 
@@ -18,10 +19,10 @@ export class UsersService {
     });
   }
 
-  async findOneById(id: number): Promise<User | undefined> {
+  async findOneById(guid: string): Promise<User | undefined> {
     return this.prismaService.user.findUnique({
       where: {
-        id,
+        guid,
       },
     });
   }
@@ -31,6 +32,7 @@ export class UsersService {
     if (encryptedPw && !(encryptedPw instanceof Error)) {
       user = {
         ...user,
+        guid: randomUUID(),
         password: encryptedPw,
       };
     }

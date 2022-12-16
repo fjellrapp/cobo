@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
+import { randomUUID } from 'crypto';
 
 const seedUser: {
+  guid: string;
   email: string;
   phone: string;
   firstName: string;
@@ -11,6 +13,7 @@ const seedUser: {
   phone: '92011453',
   firstName: 'Mats',
   lastName: 'Hagen',
+  guid: randomUUID(),
   // Only for testing; resolves to 'test'
   password: '$2y$10$uOi8ZfhsivCKBgA9waYGx.71ByX98HAMvLRGM4E3jnLQR9qIL/jf6',
 };
@@ -26,7 +29,8 @@ const run = async () => {
       lastName: seedUser.lastName,
       email: seedUser.email,
       phone: seedUser.phone,
-      password: '',
+      guid: seedUser.guid,
+      password: seedUser.password,
     },
   });
 };

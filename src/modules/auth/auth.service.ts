@@ -64,6 +64,7 @@ export class AuthService {
   }
 
   async validateUserRefreshToken(user: User, refreshToken: string) {
+    console.log('refreshTokne', refreshToken);
     if (!user.refreshToken) {
       const hashedToken = await this.encryptRefreshToken(refreshToken);
       if (!(hashedToken instanceof Error)) {
@@ -91,11 +92,11 @@ export class AuthService {
   async encryptRefreshToken(token: string) {
     return await this.bcryptService.hash(token, 10);
   }
-  async hashedTokenMatched(token: string, hash) {
+  async hashedTokenMatched(token: string, hash: string) {
     return await this.bcryptService.compareWithHash(token, hash);
   }
 
-  async refresh(userId: number, refreshToken: string) {
+  async refresh(userId: string, refreshToken: string) {
     const user = await this.usersService.findOneById(userId);
     if (!user || !user.refreshToken) {
       throw new ForbiddenException('Access denied');

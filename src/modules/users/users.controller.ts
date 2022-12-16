@@ -10,12 +10,24 @@ export class UsersController {
     const phone = request.params?.phone;
     try {
       const user = await this.service.findOneByPhone(phone);
-      console.log('user', user);
       return res.status(200).send(user);
     } catch (err) {
       res.status(404).send('Fant ingen bruker med dette telefonnummeret');
     }
-
     res.status(200).send('ok');
+  }
+
+  @Get('getById/:id')
+  async getById(@Req() request: Request, @Res() res: Response) {
+    const id = request.params?.id;
+    try {
+      const user = await this.service.findOneById(id);
+      return res.status(200).send(user);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        return res.status(401).send(e);
+      }
+      return res.status(401).send(e);
+    }
   }
 }

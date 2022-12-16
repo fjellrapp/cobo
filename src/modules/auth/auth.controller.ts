@@ -58,6 +58,6 @@ export class AuthController {
   @UseGuards(JwtRefreshAuthGuard)
   @Get('refresh')
   refreshTokens(@Req() req: Request) {
-    console.log(req.body);
+    console.log('req body', (req as any).user);
   }
 }
