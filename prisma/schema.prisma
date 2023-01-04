@@ -20,7 +20,8 @@ model User {
   household       Household?       @relation(fields: [householdId], references: [id])
   householdId     Int?
   responsibilites Responsibility[]
-  refreshToken    String?
+  session         String?          @unique
+  refreshToken    String?          @unique
 }
 
 model Household {

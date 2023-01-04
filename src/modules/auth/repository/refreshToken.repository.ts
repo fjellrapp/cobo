@@ -9,10 +9,10 @@ export class RefreshTokenRepositoy {
   constructor(private jwtService: JwtService) {}
   async createRefreshToken(user: User): Promise<string> {
     const token: RefreshToken = {
-      userId: 0,
+      userGuid: '',
       isRevoked: false,
     };
-    token.userId = user.id;
+    token.userGuid = user.guid;
 
     const signedToken = await this.jwtService.signAsync(token, {
       secret: jwtConstants.refresh_secret,

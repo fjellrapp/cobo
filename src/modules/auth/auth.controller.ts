@@ -13,6 +13,7 @@ import { User } from '@prisma/client';
 import { Response } from 'express';
 import { Public } from 'src/common/utils/decorators/public';
 import { isUser } from 'src/common/utils/guards';
+import { RefreshToken } from 'src/common/utils/types/refreshToken.type';
 import { AuthService } from './auth.service';
 import { JwtRefreshAuthGuard } from './guards/jwtr-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -31,6 +32,7 @@ export class AuthController {
     try {
       const user = req.user as User;
       const token = await this.service.login(user);
+      console.log('Token', token);
       res.status(HttpStatus.OK).send(token);
     } catch (e: unknown) {
       if (e instanceof Error) {
@@ -57,7 +59,15 @@ export class AuthController {
 
   @UseGuards(JwtRefreshAuthGuard)
   @Get('refresh')
-  refreshTokens(@Req() req: Request) {
-    console.log('req body', (req as any).user);
+  async refreshTokens(@Req() req: Request, @Res() res: Response) {
+    const { userGuid, refreshToken } = (req as any).user as RefreshToken;
+    try {
+      const refreshed = await this.service.refresh(userGuid, refreshToken);
+      if (refreshed) {
+        res.status(HttpStatus.OK).send(refreshed);
+      }
+    } catch (e) {
+      res.status(HttpStatus.BAD_REQUEST).send(e);
+    }
   }
 }

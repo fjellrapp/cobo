@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import { randomUUID } from 'crypto';
 import { BCryptService } from 'src/common/providers/bcrypt.service';
 import { RefreshToken } from 'src/common/utils/types/refreshToken.type';
 import { UsersService } from '../users/users.service';
@@ -23,7 +24,7 @@ export class AuthService {
   ) {}
 
   async validateUser(phonenumber: string, pass: string): Promise<any> {
-    const user = await this.usersService.findOneByPhone(phonenumber);
+    const user = await this.usersService.getByPhone(phonenumber);
     const compareResult = await this.bcryptService.compareWithHash(
       pass,
       user.password,
@@ -46,10 +47,10 @@ export class AuthService {
   }
 
   async signup(user: User) {
-    if (await this.usersService.findOneByPhone(user.phone)) {
+    if (await this.usersService.getByPhone(user.phone)) {
       throw new Error('A user with this phonenumber already exists');
     }
-    return this.usersService.createOne(user);
+    return this.usersService.create(user);
   }
 
   async signOut(user: User) {
@@ -57,25 +58,21 @@ export class AuthService {
   }
 
   async updateUserRefreshToken(user: User, refreshToken: string) {
-    return await this.usersService.updateOne(user, {
+    return await this.usersService.update(user, {
       ...user,
       refreshToken: refreshToken,
     });
   }
 
   async validateUserRefreshToken(user: User, refreshToken: string) {
-    console.log('refreshTokne', refreshToken);
     if (!user.refreshToken) {
       const hashedToken = await this.encryptRefreshToken(refreshToken);
       if (!(hashedToken instanceof Error)) {
         await this.updateUserRefreshToken(user, hashedToken);
       }
     } else {
-      const isSameToken = this.hashedTokenMatched(
-        refreshToken,
-        user.refreshToken,
-      );
-      if (isSameToken) {
+      const isMatch = this.hashedTokenMatched(refreshToken, user.refreshToken);
+      if (isMatch) {
         try {
           const token = await this.jwtService.verifyAsync<RefreshToken>(
             refreshToken,
@@ -97,7 +94,7 @@ export class AuthService {
   }
 
   async refresh(userId: string, refreshToken: string) {
-    const user = await this.usersService.findOneById(userId);
+    const user = await this.usersService.getById(userId);
     if (!user || !user.refreshToken) {
       throw new ForbiddenException('Access denied');
     }
@@ -119,10 +116,14 @@ export class AuthService {
   }
 
   async getTokens(user: User) {
-    console.log('UsER', user);
     const accessToken = await this.accessTokenRepo.generateAccessToken(user);
     const refreshToken = await this.refreshTokenRepo.createRefreshToken(user);
 
     return { accessToken, refreshToken };
+  }
+
+  async getGuid(token: string) {
+    const guid = await this.accessTokenRepo.decryptGuidFromAccessToken(token);
+    return guid;
   }
 }

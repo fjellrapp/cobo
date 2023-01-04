@@ -1,7 +1,8 @@
 export type RefreshToken = {
-  userId: number;
+  userGuid: string;
   isRevoked: boolean;
   iat?: number;
   exp?: number;
   expires?: Date;
+  refreshToken?: string;
 };
