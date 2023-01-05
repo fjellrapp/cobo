@@ -27,13 +27,7 @@ export class JwtRefreshAuthGuard extends AuthGuard('jwt-refresh') {
     return super.canActivate(context);
   }
 
-  handleRequest<TUser = any>(
-    err: any,
-    user: any,
-    info: any,
-    context: ExecutionContext,
-    status?: any,
-  ): TUser {
+  handleRequest<TUser = any>(err: any, user: any, info: any): TUser {
     if (err || !user) {
       throw err || new UnauthorizedException(info);
     }

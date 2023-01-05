@@ -24,8 +24,8 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('getAuthenticatedUser')
-  async getById(@Req() request: Request, @Res() res: Response) {
+  @Get('getCurrentUser')
+  async getCurrentUser(@Req() request: Request, @Res() res: Response) {
     try {
       const token = request.headers.authorization;
       const guid = await this.authService.getGuid(token);
