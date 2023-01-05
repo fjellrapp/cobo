@@ -16,7 +16,7 @@ export class RefreshTokenRepositoy {
 
     const signedToken = await this.jwtService.signAsync(token, {
       secret: jwtConstants.refresh_secret,
-      expiresIn: '7d',
+      expiresIn: '30d',
     });
     return signedToken;
   }
