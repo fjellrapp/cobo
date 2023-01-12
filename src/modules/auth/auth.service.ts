@@ -36,13 +36,13 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const { accessToken, refreshToken } = await this.getTokens(user);
+    const { access_token, refresh_token } = await this.getTokens(user);
 
-    await this.validateUserRefreshToken(user, refreshToken);
+    await this.validateUserRefreshToken(user, refresh_token);
 
     return {
-      access_token: accessToken,
-      refresh_token: refreshToken,
+      access_token: access_token,
+      refresh_token: refresh_token,
     };
   }
 
@@ -108,7 +108,7 @@ export class AuthService {
 
     const tokens = await this.getTokens(user);
     try {
-      await this.updateUserRefreshToken(user, tokens.refreshToken);
+      await this.updateUserRefreshToken(user, tokens.refresh_token);
       return tokens;
     } catch (e) {
       throw new InternalServerErrorException('500');
@@ -116,10 +116,10 @@ export class AuthService {
   }
 
   async getTokens(user: User) {
-    const accessToken = await this.accessTokenRepo.generateAccessToken(user);
-    const refreshToken = await this.refreshTokenRepo.createRefreshToken(user);
+    const access_token = await this.accessTokenRepo.generateAccessToken(user);
+    const refresh_token = await this.refreshTokenRepo.createRefreshToken(user);
 
-    return { accessToken, refreshToken };
+    return { access_token, refresh_token };
   }
 
   async getGuid(token: string) {
