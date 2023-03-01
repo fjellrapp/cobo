@@ -26,33 +26,38 @@ export class UsersRepository {
       },
     });
   }
-  async createOne(user: User): Promise<User | undefined> {
-    const encryptedPw = await this.bcryptService.hash(user.password);
-    if (encryptedPw && !(encryptedPw instanceof Error)) {
-      user = {
-        ...user,
-        guid: randomUUID(),
-        password: encryptedPw,
-      };
-    }
+  async createOne(user: User): Promise<User | Error> {
     try {
-      return await this.prismaService.user.create({ data: user });
+      const encryptedPw = await this.bcryptService.hash(user.password);
+      if (encryptedPw) {
+        user = {
+          ...user,
+          guid: randomUUID(),
+          password: encryptedPw,
+        };
+      }
+      try {
+        await this.prismaService.user.create({ data: user });
+      } catch (e: unknown) {
+        throw new Error(`${e}`);
+      }
     } catch (e) {
-      console.log('ERRR', e);
+      throw new Error(`${e}`);
     }
+    throw new Error('Something unexpected happened on create');
   }
 
   async updateOne(user: User, update: User): Promise<any> {
     try {
       await this.prismaService.user.update({
-        where: { id: user.id },
+        where: { phone: user.phone },
         data: {
           ...update,
         },
       });
-    } catch (err) {
+    } catch (err: unknown) {
       throw new BadRequestException(
-        'Noe gikk galt under oppdatering av bruker',
+        `Noe gikk galt under oppdatering av bruker: ${err}`,
       );
     }
   }

@@ -7,6 +7,7 @@ import { jwtConstants } from '../constants';
 export class AccessTokenRepository {
   constructor(private jwtService: JwtService) {}
   async generateAccessToken(user: User): Promise<string> {
+    console.log('user.guid', user);
     const payload = {
       guid: user.guid,
       phone: user.phone,
@@ -22,7 +23,6 @@ export class AccessTokenRepository {
   decryptGuidFromAccessToken(token: string): Promise<string> {
     const omittedBearer = token.split(' ')[1];
     const decrypted = this.jwtService.decode(omittedBearer, { json: true });
-
     if (decrypted['guid']) {
       return decrypted['guid'];
     }

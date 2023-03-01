@@ -29,8 +29,9 @@ export class UsersController {
     try {
       const token = request.headers.authorization;
       const guid = await this.authService.getGuid(token);
-
+      console.log('does it have guid', guid);
       const user = await this.service.getById(guid);
+      console.log('the user', user);
       return res.status(200).send(user);
     } catch (e: unknown) {
       if (e instanceof Error) {

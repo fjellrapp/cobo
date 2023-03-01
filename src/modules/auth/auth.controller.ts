@@ -8,6 +8,9 @@ import {
   Request,
   Get,
   Req,
+  BadGatewayException,
+  ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { Response } from 'express';
@@ -16,23 +19,21 @@ import { isUser } from 'src/common/utils/guards';
 import { RefreshToken } from 'src/common/utils/types/refreshToken.type';
 import { AuthService } from './auth.service';
 import { JwtRefreshAuthGuard } from './guards/jwtr-auth.guard';
-import { LocalAuthGuard } from './guards/local-auth.guard';
+import { isError } from 'src/shared/utils/errors/isError';
 
 @Controller('auth')
 export class AuthController {
   constructor(private service: AuthService) {}
 
   @Public()
-  @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(
     @Request() req,
     @Res() res,
   ): Promise<{ access_token: string; refresh_token: string } | Error> {
     try {
-      const user = req.user as User;
+      const user = req.body as Partial<User>;
       const token = await this.service.login(user);
-      console.log('Token', token);
       res.status(HttpStatus.OK).send(token);
     } catch (e: unknown) {
       if (e instanceof Error) {
@@ -51,9 +52,15 @@ export class AuthController {
     }
     try {
       const result = await this.service.signup(user);
-      res.status(HttpStatus.CREATED).send(result);
+      return res.status(HttpStatus.CREATED).send(result);
     } catch (e: unknown) {
-      res.status(HttpStatus.BAD_REQUEST).send(e);
+      if (isError(e)) {
+        throw new ForbiddenException({
+          status: HttpStatus.FORBIDDEN,
+          error: e.message,
+        });
+      }
+      throw new BadRequestException(`An unknown error was thrown: ${e}`);
     }
   }
 

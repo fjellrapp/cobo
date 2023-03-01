@@ -2,6 +2,7 @@ import {
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
@@ -35,15 +36,32 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User) {
-    const { access_token, refresh_token } = await this.getTokens(user);
+  async login(user: Partial<User>) {
+    try {
+      const currentUser = await this.usersService.getByPhone(user.phone);
+      if (currentUser) {
+        console.log('current', currentUser);
+        const { access_token, refresh_token } = await this.getTokens(
+          currentUser,
+        );
 
-    await this.validateUserRefreshToken(user, refresh_token);
+        await this.validateUserRefreshToken(currentUser, refresh_token).catch(
+          (e) => {
+            console.log("Couldn't validate refresh token", e);
+          },
+        );
 
-    return {
-      access_token: access_token,
-      refresh_token: refresh_token,
-    };
+        return {
+          access_token: access_token,
+          refresh_token: refresh_token,
+        };
+      } else {
+      }
+    } catch (e: unknown) {
+      throw new NotFoundException(
+        new Error(`Fant ikke bruker med telefonnummer: ${user.phone}`),
+      );
+    }
   }
 
   async signup(user: User) {
@@ -67,8 +85,12 @@ export class AuthService {
   async validateUserRefreshToken(user: User, refreshToken: string) {
     if (!user.refreshToken) {
       const hashedToken = await this.encryptRefreshToken(refreshToken);
-      if (!(hashedToken instanceof Error)) {
-        await this.updateUserRefreshToken(user, hashedToken);
+      if (hashedToken) {
+        return await this.updateUserRefreshToken(user, hashedToken).catch(
+          (e) => {
+            console.log('UpdateRefreshToken errored', e);
+          },
+        );
       }
     } else {
       const isMatch = this.hashedTokenMatched(refreshToken, user.refreshToken);
