@@ -8,7 +8,6 @@ import {
   Request,
   Get,
   Req,
-  BadGatewayException,
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
