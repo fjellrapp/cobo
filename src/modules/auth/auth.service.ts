@@ -40,7 +40,6 @@ export class AuthService {
     try {
       const currentUser = await this.usersService.getByPhone(user.phone);
       if (currentUser) {
-        console.log('current', currentUser);
         const { access_token, refresh_token } = await this.getTokens(
           currentUser,
         );

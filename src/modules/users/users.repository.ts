@@ -26,7 +26,7 @@ export class UsersRepository {
       },
     });
   }
-  async createOne(user: User): Promise<User | Error> {
+  async createOne(user: User): Promise<void> {
     try {
       const encryptedPw = await this.bcryptService.hash(user.password);
       if (encryptedPw) {
@@ -44,7 +44,6 @@ export class UsersRepository {
     } catch (e) {
       throw new Error(`${e}`);
     }
-    throw new Error('Something unexpected happened on create');
   }
 
   async updateOne(user: User, update: User): Promise<any> {
