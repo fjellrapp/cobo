@@ -6,9 +6,8 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { randomUUID } from 'crypto';
-import { BCryptService } from 'src/common/providers/bcrypt.service';
-import { RefreshToken } from 'src/common/utils/types/refreshToken.type';
+import { BCryptService } from '@/common/providers/bcrypt.service';
+import { RefreshToken } from '@/common/utils/types/refreshToken.type';
 import { UsersService } from '../users/users.service';
 import { jwtConstants } from './constants';
 import { AccessTokenRepository } from './repository/accessToken.repository';

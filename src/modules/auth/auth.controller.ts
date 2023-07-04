@@ -13,12 +13,12 @@ import {
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { Response } from 'express';
-import { Public } from 'src/common/utils/decorators/public';
-import { isUser } from 'src/common/utils/guards';
-import { RefreshToken } from 'src/common/utils/types/refreshToken.type';
+import { Public } from '@/common/utils/decorators/public';
+import { isUser } from '@/common/utils/guards';
+import { RefreshToken } from '@/common/utils/types/refreshToken.type';
 import { AuthService } from './auth.service';
 import { JwtRefreshAuthGuard } from './guards/jwtr-auth.guard';
-import { isError } from 'src/shared/utils/errors/isError';
+import { isError } from '@/shared/utils/errors/isError';
 
 @Controller('auth')
 export class AuthController {

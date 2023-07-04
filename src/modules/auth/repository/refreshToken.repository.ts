@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { RefreshToken } from 'src/common/utils/types/refreshToken.type';
+import { RefreshToken } from '@/common/utils/types/refreshToken.type';
 import { jwtConstants } from '../constants';
 
 @Injectable()
