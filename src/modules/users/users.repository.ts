@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { randomUUID } from 'crypto';
-import { BCryptService } from '@/common/providers/bcrypt.service';
-import { PrismaService } from '@/common/providers/prisma.service';
+import { BCryptService } from '../../common/providers/bcrypt.service';
+import { PrismaService } from '../../common/providers/prisma.service';
 
 @Injectable()
 export class UsersRepository {
