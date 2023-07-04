@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { BCryptService } from 'src/common/providers/bcrypt.service';
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -10,6 +9,7 @@ import { RefreshTokenRepositoy } from './repository/refreshToken.repository';
 import { RefreshTokenStrategy } from './strategy/jwt-r.strategy';
 import { AccessTokenStrategy } from './strategy/jwt.strategy';
 import { LocalStrategy } from './strategy/local.strategy';
+import { BCryptService } from '../../common/providers/bcrypt.service';
 
 @Module({
   imports: [UsersModule, PassportModule, JwtModule.register({})],
