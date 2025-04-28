@@ -15,7 +15,7 @@ const seedUser: {
   lastName: 'Hagen',
   guid: randomUUID(),
   // Only for testing; resolves to 'test'
-  password: '$2y$10$uOi8ZfhsivCKBgA9waYGx.71ByX98HAMvLRGM4E3jnLQR9qIL/jf6',
+  password: 'test',
 };
 
 const client = new PrismaClient();

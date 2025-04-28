@@ -27,7 +27,7 @@
     "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
     "@prisma/client": "^4.6.0",
-    "bcrypt": "^5.1.0",
+    "bcryptjs": "^3.0.2",
     "dotenv": "^16.0.3",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
@@ -64,6 +64,7 @@
     "ts-loader": "^9.2.3",
     "ts-node": "^10.0.0",
     "tsconfig-paths": "4.1.0",
+    "tsx": "^4.19.3",
     "typescript": "^4.7.4"
   },
   "jest": {
@@ -84,6 +85,6 @@
     "testEnvironment": "node"
   },
   "prisma": {
-    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed"
+    "seed": "tsx prisma/seed"
   }
 }

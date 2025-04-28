@@ -35,6 +35,7 @@ export class AuthController {
       const token = await this.service.login(user);
       res.status(HttpStatus.OK).send(token);
     } catch (e: unknown) {
+      console.log(`Error in login: ${e}`);
       if (e instanceof Error) {
         return e;
       } else {
