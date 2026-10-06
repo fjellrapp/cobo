@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '@prisma/client';
-import { RefreshToken } from 'src/common/utils/types/refreshToken.type';
-import { jwtConstants } from '../constants';
+import type { User } from '../../../generated/prisma/client.js';
+import { RefreshToken } from '../../../common/utils/types/refreshToken.type.js';
+import { jwtConstants } from '../constants/index.js';
 
 @Injectable()
 export class RefreshTokenRepositoy {

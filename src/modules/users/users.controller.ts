@@ -1,8 +1,8 @@
 import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
-import { Response, Request } from 'express';
-import { AuthService } from '../auth/auth.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { UsersService } from './users.service';
+import type { Response, Request } from 'express';
+import { AuthService } from '../auth/auth.service.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { UsersService } from './users.service.js';
 
 @Controller('users')
 export class UsersController {
@@ -13,11 +13,11 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get('getByPhone/:phone')
   async getByPhone(@Req() request: Request, @Res() res: Response) {
-    const phone = request.params?.phone;
+    const phone = request.params.phone as string;
     try {
       const user = await this.service.getByPhone(phone);
       return res.status(200).send(user);
-    } catch (err) {
+    } catch {
       res.status(404).send('Fant ingen bruker med dette telefonnummeret');
     }
     res.status(200).send('ok');

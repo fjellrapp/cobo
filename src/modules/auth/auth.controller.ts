@@ -11,14 +11,14 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
-import { Response } from 'express';
-import { Public } from '../../common/utils/decorators/public';
-import { isUser } from '../../common/utils/guards';
-import { RefreshToken } from '../../common/utils/types/refreshToken.type';
-import { AuthService } from './auth.service';
-import { JwtRefreshAuthGuard } from './guards/jwtr-auth.guard';
-import { isError } from '../../shared/utils/errors/isError';
+import type { User } from '../../generated/prisma/client.js';
+import type { Response } from 'express';
+import { Public } from '../../common/utils/decorators/public.js';
+import { isUser } from '../../common/utils/guards/index.js';
+import { RefreshToken } from '../../common/utils/types/refreshToken.type.js';
+import { AuthService } from './auth.service.js';
+import { JwtRefreshAuthGuard } from './guards/jwtr-auth.guard.js';
+import { isError } from '../../shared/utils/errors/isError.js';
 
 @Controller('auth')
 export class AuthController {
@@ -57,7 +57,7 @@ export class AuthController {
       if (isError(e)) {
         throw new ForbiddenException({
           status: HttpStatus.FORBIDDEN,
-          error: e.message,
+          error: (e as Error).message,
         });
       }
       throw new BadRequestException(`An unknown error was thrown: ${e}`);

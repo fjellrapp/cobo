@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { Household } from '@prisma/client';
-import { HouseholdService } from './household.service';
+import type { Household } from '../../generated/prisma/client.js';
+import { HouseholdService } from './household.service.js';
 
 @Controller('household')
 export class HouseholdController {

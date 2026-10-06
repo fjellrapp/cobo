@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { HouseholdService } from './household.service';
-import { HouseholdController } from './household.controller';
+import { HouseholdService } from './household.service.js';
+import { HouseholdController } from './household.controller.js';
 
 @Module({
   providers: [HouseholdService],

@@ -1,4 +1,4 @@
-import { User } from '@prisma/client';
+import type { User } from '../../../generated/prisma/client.js';
 
 export function isUser(user: User | any): user is User {
   return (user as User).phone !== undefined;

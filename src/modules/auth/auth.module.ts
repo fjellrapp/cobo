@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { UsersModule } from '../users/users.module';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { AccessTokenRepository } from './repository/accessToken.repository';
-import { RefreshTokenRepositoy } from './repository/refreshToken.repository';
-import { RefreshTokenStrategy } from './strategy/jwt-r.strategy';
-import { AccessTokenStrategy } from './strategy/jwt.strategy';
-import { LocalStrategy } from './strategy/local.strategy';
-import { BCryptService } from '../../common/providers/bcrypt.service';
+import { UsersModule } from '../users/users.module.js';
+import { AuthController } from './auth.controller.js';
+import { AuthService } from './auth.service.js';
+import { AccessTokenRepository } from './repository/accessToken.repository.js';
+import { RefreshTokenRepositoy } from './repository/refreshToken.repository.js';
+import { RefreshTokenStrategy } from './strategy/jwt-r.strategy.js';
+import { AccessTokenStrategy } from './strategy/jwt.strategy.js';
+import { LocalStrategy } from './strategy/local.strategy.js';
+import { BCryptService } from '../../common/providers/bcrypt.service.js';
 
 @Module({
   imports: [UsersModule, PassportModule, JwtModule.register({})],

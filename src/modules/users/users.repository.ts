@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import type { User } from '../../generated/prisma/client.js';
 import { randomUUID } from 'crypto';
-import { BCryptService } from '../../common/providers/bcrypt.service';
-import { PrismaService } from '../../common/providers/prisma.service';
+import { BCryptService } from '../../common/providers/bcrypt.service.js';
+import { PrismaService } from '../../common/providers/prisma.service.js';
 
 @Injectable()
 export class UsersRepository {
@@ -39,10 +39,10 @@ export class UsersRepository {
       try {
         await this.prismaService.user.create({ data: user });
       } catch (e: unknown) {
-        throw new Error(`${e}`);
+        throw new Error(`${e}`, { cause: e });
       }
     } catch (e) {
-      throw new Error(`${e}`);
+      throw new Error(`${e}`, { cause: e });
     }
   }
 

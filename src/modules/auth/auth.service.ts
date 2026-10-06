@@ -5,13 +5,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '@prisma/client';
-import { BCryptService } from '../../common/providers/bcrypt.service';
-import { RefreshToken } from '../../common/utils/types/refreshToken.type';
-import { UsersService } from '../users/users.service';
-import { jwtConstants } from './constants';
-import { AccessTokenRepository } from './repository/accessToken.repository';
-import { RefreshTokenRepositoy } from './repository/refreshToken.repository';
+import type { User } from '../../generated/prisma/client.js';
+import { BCryptService } from '../../common/providers/bcrypt.service.js';
+import { RefreshToken } from '../../common/utils/types/refreshToken.type.js';
+import { UsersService } from '../users/users.service.js';
+import { jwtConstants } from './constants/index.js';
+import { AccessTokenRepository } from './repository/accessToken.repository.js';
+import { RefreshTokenRepositoy } from './repository/refreshToken.repository.js';
 
 @Injectable()
 export class AuthService {
@@ -39,9 +39,8 @@ export class AuthService {
     try {
       const currentUser = await this.usersService.getByPhone(user.phone);
       if (currentUser) {
-        const { access_token, refresh_token } = await this.getTokens(
-          currentUser,
-        );
+        const { access_token, refresh_token } =
+          await this.getTokens(currentUser);
 
         await this.validateUserRefreshToken(currentUser, refresh_token).catch(
           (e) => {
@@ -53,9 +52,8 @@ export class AuthService {
           access_token: access_token,
           refresh_token: refresh_token,
         };
-      } else {
       }
-    } catch (e: unknown) {
+    } catch {
       throw new NotFoundException(
         new Error(`Fant ikke bruker med telefonnummer: ${user.phone}`),
       );
@@ -130,7 +128,7 @@ export class AuthService {
     try {
       await this.updateUserRefreshToken(user, tokens.refresh_token);
       return tokens;
-    } catch (e) {
+    } catch {
       throw new InternalServerErrorException('500');
     }
   }

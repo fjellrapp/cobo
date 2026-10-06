@@ -4,34 +4,38 @@
 
 ## Installation
 
+Use Node.js 24 or newer and pnpm 10.18.3.
+
 ```bash
-$ npm install
+$ pnpm install
 ```
+
+Prisma Client is generated during installation from `prisma/schema.prisma`. Set `DATABASE_URL`, `JWT_KEY`, and `JWT_KEY_REFRESH` in the runtime environment or a local `.env` file before starting the application.
 
 ## Running the app
 
 ```bash
 # development
-$ npm run start
+$ pnpm start
 
 # watch mode
-$ npm run start:dev
+$ pnpm start:dev
 
 # production mode
-$ npm run start:prod
+$ pnpm start:prod
 ```
 
 ## Test
 
 ```bash
 # unit tests
-$ npm run test
+$ pnpm test
 
 # e2e tests
-$ npm run test:e2e
+$ pnpm test:e2e
 
 # test coverage
-$ npm run test:cov
+$ pnpm test:cov
 ```
 
 ## Support
