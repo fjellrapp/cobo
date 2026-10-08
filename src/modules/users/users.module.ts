@@ -6,12 +6,10 @@ import { RefreshTokenRepositoy } from '../auth/repository/refreshToken.repositor
 import { UsersController } from './users.controller.js';
 import { UsersRepository } from './users.repository.js';
 import { UsersService } from './users.service.js';
-import { PrismaService } from '../../common/providers/prisma.service.js';
 import { BCryptService } from '../../common/providers/bcrypt.service.js';
 
 @Module({
   providers: [
-    PrismaService,
     UsersService,
     BCryptService,
     UsersRepository,

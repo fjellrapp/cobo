@@ -8,9 +8,9 @@ export class AccessTokenRepository {
   constructor(private jwtService: JwtService) {}
   async generateAccessToken(user: User): Promise<string> {
     const payload = {
+      sub: String(user.id),
       guid: user.guid,
       phone: user.phone,
-      password: user.password,
     };
     const token = await this.jwtService.signAsync(payload, {
       secret: jwtConstants.access_secret,

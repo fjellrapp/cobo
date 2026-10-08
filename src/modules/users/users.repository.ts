@@ -19,6 +19,10 @@ export class UsersRepository {
     });
   }
 
+  async findOneByEmail(email: string): Promise<User | undefined> {
+    return this.prismaService.user.findUnique({ where: { email } });
+  }
+
   async findOneById(guid: string): Promise<User | undefined> {
     return this.prismaService.user.findUnique({
       where: {
@@ -27,23 +31,18 @@ export class UsersRepository {
     });
   }
   async createOne(user: User): Promise<void> {
-    try {
-      const encryptedPw = await this.bcryptService.hash(user.password);
-      if (encryptedPw) {
-        user = {
-          ...user,
-          guid: randomUUID(),
-          password: encryptedPw,
-        };
-      }
-      try {
-        await this.prismaService.user.create({ data: user });
-      } catch (e: unknown) {
-        throw new Error(`${e}`, { cause: e });
-      }
-    } catch (e) {
-      throw new Error(`${e}`, { cause: e });
+    const encryptedPw = await this.bcryptService.hash(user.password);
+    if (!encryptedPw) {
+      throw new Error('Password hashing failed.');
     }
+
+    await this.prismaService.user.create({
+      data: {
+        ...user,
+        guid: randomUUID(),
+        password: encryptedPw,
+      },
+    });
   }
 
   async updateOne(user: User, update: User): Promise<any> {
@@ -59,5 +58,24 @@ export class UsersRepository {
         `Noe gikk galt under oppdatering av bruker: ${err}`,
       );
     }
+  }
+
+  async setRefreshToken(guid: string, digest: string | null) {
+    await this.prismaService.user.update({
+      where: { guid },
+      data: { refreshToken: digest },
+    });
+  }
+
+  async rotateRefreshToken(
+    guid: string,
+    previousDigest: string,
+    nextDigest: string,
+  ) {
+    const result = await this.prismaService.user.updateMany({
+      where: { guid, refreshToken: previousDigest },
+      data: { refreshToken: nextDigest },
+    });
+    return result.count === 1;
   }
 }

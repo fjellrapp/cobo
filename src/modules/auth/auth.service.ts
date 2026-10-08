@@ -1,15 +1,13 @@
 import {
-  ForbiddenException,
   Injectable,
-  InternalServerErrorException,
-  NotFoundException,
+  ConflictException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import type { User } from '../../generated/prisma/client.js';
 import { BCryptService } from '../../common/providers/bcrypt.service.js';
-import { RefreshToken } from '../../common/utils/types/refreshToken.type.js';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { UsersService } from '../users/users.service.js';
-import { jwtConstants } from './constants/index.js';
 import { AccessTokenRepository } from './repository/accessToken.repository.js';
 import { RefreshTokenRepositoy } from './repository/refreshToken.repository.js';
 
@@ -25,112 +23,83 @@ export class AuthService {
 
   async validateUser(phonenumber: string, pass: string): Promise<any> {
     const user = await this.usersService.getByPhone(phonenumber);
+    if (!user) return null;
     const compareResult = await this.bcryptService.compareWithHash(
       pass,
       user.password,
     );
-    if (user && compareResult) {
+    if (compareResult) {
       return user;
     }
     return null;
   }
 
   async login(user: Partial<User>) {
-    try {
-      const currentUser = await this.usersService.getByPhone(user.phone);
-      if (currentUser) {
-        const { access_token, refresh_token } =
-          await this.getTokens(currentUser);
-
-        await this.validateUserRefreshToken(currentUser, refresh_token).catch(
-          (e) => {
-            console.log("Couldn't validate refresh token", e);
-          },
-        );
-
-        return {
-          access_token: access_token,
-          refresh_token: refresh_token,
-        };
-      }
-    } catch {
-      throw new NotFoundException(
-        new Error(`Fant ikke bruker med telefonnummer: ${user.phone}`),
-      );
+    const currentUser = await this.validateUser(user.phone, user.password);
+    if (!currentUser) {
+      throw new UnauthorizedException({
+        code: 'INVALID_CREDENTIALS',
+        message: 'Invalid phone number or password.',
+      });
     }
+    const tokens = await this.getTokens(currentUser);
+    await this.usersService.setRefreshToken(
+      currentUser.guid,
+      this.refreshDigest(tokens.refresh_token),
+    );
+    return tokens;
   }
 
   async signup(user: User) {
-    if (await this.usersService.getByPhone(user.phone)) {
-      throw new Error('A user with this phonenumber already exists');
+    const [existingPhone, existingEmail] = await Promise.all([
+      this.usersService.getByPhone(user.phone),
+      this.usersService.getByEmail(user.email),
+    ]);
+    if (existingPhone || existingEmail) {
+      throw new ConflictException({
+        code: 'ACCOUNT_ALREADY_EXISTS',
+        message: 'An account with this email or phone number already exists.',
+      });
     }
     return this.usersService.create(user);
   }
 
   async signOut(user: User) {
-    await this.updateUserRefreshToken(user, null);
+    await this.usersService.setRefreshToken(user.guid, null);
   }
 
-  async updateUserRefreshToken(user: User, refreshToken: string) {
-    return await this.usersService.update(user, {
-      ...user,
-      refreshToken: refreshToken,
-    });
-  }
-
-  async validateUserRefreshToken(user: User, refreshToken: string) {
-    if (!user.refreshToken) {
-      const hashedToken = await this.encryptRefreshToken(refreshToken);
-      if (hashedToken) {
-        return await this.updateUserRefreshToken(user, hashedToken).catch(
-          (e) => {
-            console.log('UpdateRefreshToken errored', e);
-          },
-        );
-      }
-    } else {
-      const isMatch = this.hashedTokenMatched(refreshToken, user.refreshToken);
-      if (isMatch) {
-        try {
-          const token = await this.jwtService.verifyAsync<RefreshToken>(
-            refreshToken,
-            { secret: jwtConstants.refresh_secret },
-          );
-          return token;
-        } catch (e) {
-          console.log(`Catched an error in validateUserRefreshToken, ${e}`);
-        }
-      }
-    }
-  }
-
-  async encryptRefreshToken(token: string) {
-    return await this.bcryptService.hash(token, 10);
-  }
-  async hashedTokenMatched(token: string, hash: string) {
-    return await this.bcryptService.compareWithHash(token, hash);
+  private refreshDigest(token: string) {
+    return createHash('sha256').update(token).digest('hex');
   }
 
   async refresh(userId: string, refreshToken: string) {
     const user = await this.usersService.getById(userId);
-    if (!user || !user.refreshToken) {
-      throw new ForbiddenException('Access denied');
+    const digest = this.refreshDigest(refreshToken);
+    if (
+      !user ||
+      !user.refreshToken ||
+      user.refreshToken.length !== digest.length ||
+      !timingSafeEqual(Buffer.from(user.refreshToken), Buffer.from(digest))
+    ) {
+      throw new UnauthorizedException({
+        code: 'SESSION_EXPIRED',
+        message: 'Please sign in again.',
+      });
     }
-    const refreshTokenMatches = this.bcryptService.compareWithHash(
-      user.refreshToken,
-      refreshToken,
-    );
-    if (!refreshTokenMatches) {
-      throw new ForbiddenException('Access denied');
-    }
-
     const tokens = await this.getTokens(user);
-    try {
-      await this.updateUserRefreshToken(user, tokens.refresh_token);
-      return tokens;
-    } catch {
-      throw new InternalServerErrorException('500');
+    // Compare-and-swap prevents a replay or parallel refresh from rotating twice.
+    const rotated = await this.usersService.rotateRefreshToken(
+      user.guid,
+      digest,
+      this.refreshDigest(tokens.refresh_token),
+    );
+    if (!rotated) {
+      throw new UnauthorizedException({
+        code: 'SESSION_EXPIRED',
+        message: 'Please sign in again.',
+      });
     }
+    return tokens;
   }
 
   async getTokens(user: User) {

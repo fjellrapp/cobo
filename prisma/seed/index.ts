@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../../src/generated/prisma/client.js';
 import { randomUUID } from 'crypto';
+import { seedUserAccount } from './seed-user.js';
 
 const seedUser: {
   guid: string;
@@ -16,7 +17,7 @@ const seedUser: {
   firstName: 'Mats',
   lastName: 'Hagen',
   guid: randomUUID(),
-  // Only for testing; resolves to 'test'
+  // Development fixture only; hashed before persistence.
   password: 'test',
 };
 
@@ -27,17 +28,23 @@ const client = new PrismaClient({
 });
 
 const run = async () => {
-  await client.user.upsert({
-    where: { phone: seedUser.phone },
+  const user = await seedUserAccount(client, seedUser);
+
+  const household = await client.household.upsert({
+    where: { publicId: 'd8d9a278-9ea9-4c5d-9aaf-7e6cd34f56ad' },
     update: {},
     create: {
-      firstName: seedUser.firstName,
-      lastName: seedUser.lastName,
-      email: seedUser.email,
-      phone: seedUser.phone,
-      guid: seedUser.guid,
-      password: seedUser.password,
+      publicId: 'd8d9a278-9ea9-4c5d-9aaf-7e6cd34f56ad',
+      displayName: 'Test household',
     },
+  });
+
+  await client.householdMembership.upsert({
+    where: {
+      userId_householdId: { userId: user.id, householdId: household.id },
+    },
+    update: { role: 'OWNER', leftAt: null },
+    create: { userId: user.id, householdId: household.id, role: 'OWNER' },
   });
 };
 

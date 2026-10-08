@@ -6,6 +6,11 @@ generator client {
   generatedFileExtension = "ts"
 }
 
+enum HouseholdRole {
+  OWNER
+  MEMBER
+}
+
 datasource db {
   provider = "postgresql"
 }
@@ -20,8 +25,9 @@ model User {
   firstName       String
   lastName        String
   password        String
-  household       Household?       @relation(fields: [householdId], references: [id])
-  householdId     Int?
+  memberships       HouseholdMembership[]
+  createdInvitations HouseholdInvitation[] @relation("InvitationCreator")
+  acceptedInvitations HouseholdInvitation[] @relation("InvitationAccepter")
   responsibilites Responsibility[]
   session         String?          @unique
   refreshToken    String?          @unique
@@ -29,13 +35,50 @@ model User {
 
 model Household {
   id          Int      @id @default(autoincrement())
+  publicId    String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   displayName String
-  description String
+  description String   @default("")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  address     Address? @relation(fields: [id], references: [id])
+   addressId   Int?
+   address     Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
   tasks       Task[]
-  members     User[]
+  memberships HouseholdMembership[]
+  invitations HouseholdInvitation[]
+}
+
+model HouseholdMembership {
+  id          Int           @id @default(autoincrement())
+  publicId    String        @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      Int
+  householdId Int
+  role        HouseholdRole
+  joinedAt    DateTime      @default(now())
+  leftAt      DateTime?
+  user        User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  household   Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, householdId])
+  @@index([householdId])
+  @@index([userId])
+}
+
+model HouseholdInvitation {
+  id               Int       @id @default(autoincrement())
+  publicId         String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  householdId      Int
+  createdByUserId  Int
+  tokenHash        String    @unique
+  createdAt        DateTime  @default(now())
+  expiresAt        DateTime
+  acceptedAt       DateTime?
+  acceptedByUserId Int?
+  revokedAt        DateTime?
+  household        Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  createdBy        User      @relation("InvitationCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  acceptedBy       User?     @relation("InvitationAccepter", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([householdId, expiresAt])
 }
 
 model Address {

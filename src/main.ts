@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
@@ -12,6 +13,7 @@ async function bootstrap() {
       credentials: true,
     },
   });
+  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
   await app.listen(port).then(() => {
     console.log(`Server started on port ${port}`);
   });
